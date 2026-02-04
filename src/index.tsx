@@ -1,16 +1,11 @@
-import { createCliRenderer, TextAttributes } from "@opentui/core";
-import { createRoot } from "@opentui/react";
+// Entry point for TTyper
 
-function App() {
-  return (
-    <box alignItems="center" justifyContent="center" flexGrow={1}>
-      <box justifyContent="center" alignItems="flex-end">
-        <ascii-font font="tiny" text="OpenTUI" />
-        <text attributes={TextAttributes.DIM}>What will you build?</text>
-      </box>
-    </box>
-  );
-}
+import { createCliRenderer } from '@opentui/core'
+import { createRoot } from '@opentui/react'
+import { App } from './App.js'
 
-const renderer = await createCliRenderer();
-createRoot(renderer).render(<App />);
+const renderer = await createCliRenderer({
+  exitOnCtrlC: true
+})
+
+createRoot(renderer).render(<App />)

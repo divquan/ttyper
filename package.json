@@ -15,6 +15,7 @@
   "dependencies": {
     "@opentui/core": "^0.1.75",
     "@opentui/react": "^0.1.75",
+    "convex": "^1.31.7",
     "react": "^19.2.3"
   }
 }
