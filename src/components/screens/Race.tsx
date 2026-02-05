@@ -57,9 +57,16 @@ export function Race({ config, onComplete, onQuit }: RaceProps) {
       return
     }
 
-    // Handle printable characters
+    // Handle printable characters including space
+    if (key.name === 'space') {
+      handleCharacter(' ')
+      return
+    }
+
+    // Handle regular characters (including uppercase via shift)
     if (key.name.length === 1 && !key.ctrl) {
-      handleCharacter(key.name)
+      const char = key.shift ? key.name.toUpperCase() : key.name
+      handleCharacter(char)
     }
   })
 

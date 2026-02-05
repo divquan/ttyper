@@ -6,7 +6,7 @@ import { calculateAllMetrics } from '../utils/wpmCalculator.js'
 
 export function useTypingEngine(targetText: string, duration: number | null) {
   const [state, setState] = useState<TypingState>({
-    targetText,
+    targetText: '',
     userInput: '',
     cursorPosition: 0,
     errors: [],
@@ -18,6 +18,27 @@ export function useTypingEngine(targetText: string, duration: number | null) {
   const [currentTime, setCurrentTime] = useState<number>(0)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const wpmHistoryRef = useRef<number[]>([])
+
+  // Update targetText when it changes (e.g., when text is generated)
+  useEffect(() => {
+    if (targetText && targetText !== state.targetText) {
+      setState(prev => ({
+        ...prev,
+        targetText,
+        userInput: '',
+        cursorPosition: 0,
+        errors: [],
+        startTime: null,
+        endTime: null,
+        isComplete: false
+      }))
+      setCurrentTime(0)
+      wpmHistoryRef.current = []
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+      }
+    }
+  }, [targetText])
 
   // Start timer when first character is typed
   useEffect(() => {
@@ -50,7 +71,7 @@ export function useTypingEngine(targetText: string, duration: number | null) {
   }, [state.startTime, state.isComplete, duration, state.userInput.length, state.errors.length])
 
   const handleCharacter = useCallback((char: string) => {
-    if (state.isComplete) return
+    if (state.isComplete || !state.targetText) return
 
     setState(prev => {
       // Start timer on first character
@@ -65,8 +86,8 @@ export function useTypingEngine(targetText: string, duration: number | null) {
         ? prev.errors 
         : [...prev.errors, position]
 
-      // Check if race is complete
-      const isComplete = newInput.length >= prev.targetText.length
+      // Check if race is complete (only if we have actual text)
+      const isComplete = prev.targetText.length > 0 && newInput.length >= prev.targetText.length
       const endTime = isComplete ? Date.now() : null
 
       return {
@@ -79,7 +100,7 @@ export function useTypingEngine(targetText: string, duration: number | null) {
         isComplete
       }
     })
-  }, [state.isComplete])
+  }, [state.isComplete, state.targetText])
 
   const handleBackspace = useCallback(() => {
     if (state.isComplete || state.userInput.length === 0) return
