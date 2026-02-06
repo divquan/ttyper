@@ -1,5 +1,5 @@
 {
-  "name": "ttyper",
+  "name": "t-typer",
   "version": "1.0.0",
   "description": "A terminal-based TypeRacer game with multiplayer support",
   "module": "src/index.tsx",
@@ -29,7 +29,7 @@
     "bun": ">=1.0.0"
   },
   "bin": {
-    "ttyper": "dist/index.js"
+    "t-typer": "dist/index.js"
   },
   "files": [
     "dist/",
