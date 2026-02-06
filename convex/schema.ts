@@ -10,11 +10,17 @@ export default defineSchema({
     hostId: v.string(),
     status: v.union(v.literal('waiting'), v.literal('racing'), v.literal('finished')),
     text: v.string(),
+    textCategory: v.string(),
     maxPlayers: v.number(),
+    isPublic: v.boolean(),
+    joinCode: v.optional(v.string()),
+    countdownStartedAt: v.optional(v.number()),
     createdAt: v.number()
   })
   .index('by_host', ['hostId'])
-  .index('by_status', ['status']),
+  .index('by_status', ['status'])
+  .index('by_code', ['joinCode'])
+  .index('by_status_public', ['status', 'isPublic']),
 
   // Player participation in lobbies
   lobbyPlayers: defineTable({
@@ -26,6 +32,7 @@ export default defineSchema({
     wpm: v.number(),
     accuracy: v.number(),
     status: v.union(v.literal('waiting'), v.literal('ready'), v.literal('racing'), v.literal('finished')),
+    finishedAt: v.optional(v.number()),
     joinedAt: v.number()
   })
   .index('by_lobby', ['lobbyId'])
@@ -47,14 +54,4 @@ export default defineSchema({
   })
   .index('by_user', ['userId'])
   .index('by_finished', ['finishedAt']),
-
-  // Chat messages for lobbies
-  chatMessages: defineTable({
-    lobbyId: v.id('lobbies'),
-    userId: v.string(),
-    userName: v.string(),
-    message: v.string(),
-    sentAt: v.number()
-  })
-  .index('by_lobby', ['lobbyId'])
 })

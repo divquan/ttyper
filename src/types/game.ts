@@ -58,6 +58,39 @@ export type ScreenState =
   | 'race'
   | 'results'
   | 'settings'
+  | 'multiplayer-menu'
+  | 'join-lobby'
+  | 'lobby'
+  | 'multiplayer-race'
+  | 'multiplayer-results'
+
+export interface MultiplayerRaceConfig {
+  lobbyId: string
+  text: string
+  textCategory: string
+  isHost: boolean
+}
+
+export interface LobbyPlayer {
+  userId: string
+  name: string
+  isReady: boolean
+  progress: number
+  wpm: number
+  accuracy: number
+  status: 'waiting' | 'ready' | 'racing' | 'finished'
+  isHost: boolean
+}
+
+export interface LobbyInfo {
+  id: string
+  name: string
+  joinCode: string
+  status: 'waiting' | 'racing' | 'finished'
+  maxPlayers: number
+  textCategory: string
+  isPublic: boolean
+}
 
 export interface MenuOption {
   id: string

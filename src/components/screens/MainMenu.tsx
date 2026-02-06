@@ -14,7 +14,7 @@ export function MainMenu({ onNavigate, onExit }: MainMenuProps) {
 
   const menuOptions = [
     { id: 'solo', label: 'Solo Practice', icon: '🎮', disabled: false },
-    { id: 'multiplayer', label: 'Multiplayer', icon: '🏁', disabled: true },
+    { id: 'multiplayer', label: 'Multiplayer', icon: '🏁', disabled: false },
     { id: 'stats', label: 'Statistics', icon: '📊', disabled: true },
     { id: 'settings', label: 'Settings', icon: '⚙️', disabled: false },
     { id: 'exit', label: 'Exit', icon: '❌', disabled: false },
@@ -27,6 +27,9 @@ export function MainMenu({ onNavigate, onExit }: MainMenuProps) {
     switch (option.id) {
       case 'solo':
         onNavigate('solo-config')
+        break
+      case 'multiplayer':
+        onNavigate('multiplayer-menu')
         break
       case 'settings':
         onNavigate('settings')
