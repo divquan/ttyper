@@ -33,8 +33,8 @@ function AppContent() {
   const [mpError, setMpError] = useState<string>('')
   const [lobbyData, setLobbyData] = useState<any>(null)
   
-  // Polling ref for lobby updates
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  // Subscription ref for lobby updates
+  const lobbyUnsubscribeRef = useRef<(() => void) | null>(null)
   const racePollRef = useRef<NodeJS.Timeout | null>(null)
   
   // Convex multiplayer hook
@@ -71,14 +71,16 @@ function AppContent() {
     setScreen('menu')
   }, [])
 
-  // Start polling lobby updates
-  const startLobbyPolling = useCallback((id: string) => {
-    if (pollIntervalRef.current) {
-      clearInterval(pollIntervalRef.current)
+  // Start lobby subscription for real-time updates
+  const startLobbySubscription = useCallback((id: string) => {
+    // Stop any existing subscription
+    if (lobbyUnsubscribeRef.current) {
+      lobbyUnsubscribeRef.current()
+      lobbyUnsubscribeRef.current = null
     }
     
-    pollIntervalRef.current = setInterval(async () => {
-      const data = await convex.getLobby(id)
+    // Start new subscription
+    const unsubscribe = convex.watchLobby(id, (data: any) => {
       if (data) {
         setLobbyData(data)
         setIsHost(data.isHost)
@@ -102,26 +104,35 @@ function AppContent() {
         setLobbyPlayers(players)
         setJoinCode(data.lobby.joinCode || '')
         
-        // Check if race has started
-        if (data.lobby.status === 'racing' && screen === 'lobby') {
-          // Transition to race screen
-          setMpConfig({
-            lobbyId: id,
-            text: data.lobby.text,
-            textCategory: data.lobby.textCategory,
-            isHost: data.isHost,
+        // Check if race has started - use functional update to get current screen
+        if (data.lobby.status === 'racing') {
+          setScreen(currentScreen => {
+            if (currentScreen === 'lobby') {
+              // Transition to race screen
+              setMpConfig({
+                lobbyId: id,
+                text: data.lobby.text,
+                textCategory: data.lobby.textCategory,
+                isHost: data.isHost,
+              })
+              return 'multiplayer-race'
+            }
+            return currentScreen
           })
-          setScreen('multiplayer-race')
         }
       }
-    }, 500) // Poll every 500ms
-  }, [convex, screen])
+    }, (err: any) => {
+      console.error('Lobby subscription error:', err)
+    })
+    
+    lobbyUnsubscribeRef.current = unsubscribe
+  }, [convex])
 
-  // Stop polling
-  const stopLobbyPolling = useCallback(() => {
-    if (pollIntervalRef.current) {
-      clearInterval(pollIntervalRef.current)
-      pollIntervalRef.current = null
+  // Stop lobby subscription
+  const stopLobbySubscription = useCallback(() => {
+    if (lobbyUnsubscribeRef.current) {
+      lobbyUnsubscribeRef.current()
+      lobbyUnsubscribeRef.current = null
     }
   }, [])
 
@@ -131,12 +142,12 @@ function AppContent() {
     if (result.success && result.lobbyId) {
       setLobbyId(result.lobbyId)
       setJoinCode(result.joinCode || '')
-      startLobbyPolling(result.lobbyId)
+      startLobbySubscription(result.lobbyId)
       setScreen('lobby')
     } else {
       setMpError(result.error || 'Failed to join')
     }
-  }, [convex, startLobbyPolling])
+  }, [convex, startLobbySubscription])
 
   const handleCreateLobby = useCallback(async () => {
     console.log('handleCreateLobby called')
@@ -147,7 +158,7 @@ function AppContent() {
         setLobbyId(result.lobbyId)
         setJoinCode(result.joinCode)
         setIsHost(true)
-        startLobbyPolling(result.lobbyId)
+        startLobbySubscription(result.lobbyId)
         setScreen('lobby')
       } else {
         setMpError(result.error || 'Failed to create lobby')
@@ -155,20 +166,20 @@ function AppContent() {
     } catch (err) {
       setMpError('Error creating lobby: ' + String(err))
     }
-  }, [convex, startLobbyPolling])
+  }, [convex, startLobbySubscription])
 
   const handleJoinByCode = useCallback(async (code: string, playerName: string) => {
     const result = await convex.joinLobbyByCode(code, playerName)
     if (result.success && result.lobbyId) {
       setLobbyId(result.lobbyId)
       setIsHost(false)
-      startLobbyPolling(result.lobbyId)
+      startLobbySubscription(result.lobbyId)
       setMpError('')
       setScreen('lobby')
     } else {
       setMpError(result.error || 'Failed to join')
     }
-  }, [convex, startLobbyPolling])
+  }, [convex, startLobbySubscription])
 
   const handleToggleReady = useCallback(async () => {
     if (!lobbyId || !currentUserId) return
@@ -199,7 +210,7 @@ function AppContent() {
 
   const handleLeaveLobby = useCallback(async () => {
     if (lobbyId) {
-      stopLobbyPolling()
+      stopLobbySubscription()
       await convex.leaveLobby(lobbyId)
     }
     setLobbyId(null)
@@ -207,7 +218,7 @@ function AppContent() {
     setLobbyData(null)
     setCurrentUserId('')
     setScreen('multiplayer-menu')
-  }, [lobbyId, convex, stopLobbyPolling])
+  }, [lobbyId, convex, stopLobbySubscription])
 
   const handleMultiplayerRaceComplete = useCallback(async (stats: RaceStats) => {
     if (!lobbyId) return
@@ -225,8 +236,8 @@ function AppContent() {
     setScreen('multiplayer-results')
     
     // Stop lobby polling, start results polling
-    stopLobbyPolling()
-  }, [lobbyId, convex, stopLobbyPolling])
+    stopLobbySubscription()
+  }, [lobbyId, convex, stopLobbySubscription])
 
   const handleUpdateProgress = useCallback(async (progress: number, wpm: number, accuracy: number) => {
     if (!lobbyId) return
@@ -237,40 +248,45 @@ function AppContent() {
   const handleRaceAgain = useCallback(() => {
     if (lobbyId) {
       // Return to lobby for another race
-      startLobbyPolling(lobbyId)
+      startLobbySubscription(lobbyId)
       setScreen('lobby')
     } else {
       setScreen('multiplayer-menu')
     }
-  }, [lobbyId, startLobbyPolling])
+  }, [lobbyId, startLobbySubscription])
 
   const handleNewRace = useCallback(() => {
     if (lobbyId) {
       convex.leaveLobby(lobbyId)
     }
-    stopLobbyPolling()
+    stopLobbySubscription()
     setLobbyId(null)
     setLobbyPlayers([])
     setLobbyData(null)
     setCurrentUserId('')
     setScreen('multiplayer-menu')
-  }, [lobbyId, convex, stopLobbyPolling])
+  }, [lobbyId, convex, stopLobbySubscription])
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      stopLobbyPolling()
+      stopLobbySubscription()
       if (racePollRef.current) {
         clearInterval(racePollRef.current)
       }
     }
-  }, [stopLobbyPolling])
+  }, [stopLobbySubscription])
 
   // Global keyboard shortcuts
   useKeyboard((key) => {
     // Always allow Ctrl+C to exit
     if (key.ctrl && key.name === 'c') {
       handleExit()
+      return
+    }
+
+    // Don't handle other keys if in lobby (handled by Lobby component)
+    if (screen === 'lobby') {
       return
     }
 

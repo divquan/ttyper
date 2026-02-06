@@ -114,7 +114,7 @@ export function useConvexMultiplayer() {
     }
   }, [client])
 
-  // Get lobby state (for polling)
+  // Get lobby state (one-time fetch)
   const getLobby = useCallback(async (lobbyId: string) => {
     if (!client) return null
     
@@ -127,6 +127,29 @@ export function useConvexMultiplayer() {
     } catch (err) {
       return null
     }
+  }, [client])
+
+  // Watch lobby for real-time updates (reactive subscription)
+  const watchLobby = useCallback((lobbyId: string, onUpdate: (data: any) => void, onError?: (err: any) => void) => {
+    if (!client) return () => {}
+    
+    const unsubscribe = client.onUpdate(
+      api.lobbies.getLobby,
+      { 
+        lobbyId: toLobbyId(lobbyId),
+        userId: userIdRef.current,
+      },
+      (result) => {
+        onUpdate(result)
+      },
+      (err) => {
+        console.error('Lobby subscription error:', err)
+        onError?.(err)
+      }
+    )
+    
+    // Return unsubscribe function
+    return unsubscribe
   }, [client])
 
   // Toggle ready status
@@ -250,6 +273,7 @@ export function useConvexMultiplayer() {
     createLobby,
     joinLobbyByCode,
     getLobby,
+    watchLobby,
     toggleReady,
     leaveLobby,
     startRace,

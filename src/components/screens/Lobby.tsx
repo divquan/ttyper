@@ -37,11 +37,8 @@ export function Lobby({
       return
     }
 
-    // Check for 's' key (either from key.name or key.sequence)
-    if ((key.name === 's' || key.sequence === 's') && isHost) {
-      if (canStart) {
-        onStartRace()
-      }
+    if (key.name === 's' && isHost && canStart) {
+      onStartRace()
       return
     }
   })
