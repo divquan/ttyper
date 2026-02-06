@@ -29,7 +29,8 @@
     "bun": ">=1.0.0"
   },
   "bin": {
-    "@divquan/t-typer": "dist/index.js"
+    "ttyper": "dist/index.js",
+    "t-typer": "dist/index.js"
   },
   "files": [
     "dist/",
