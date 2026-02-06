@@ -1,10 +1,47 @@
 {
-  "name": "t-typer",
+  "name": "ttyper",
+  "version": "1.0.0",
+  "description": "A terminal-based TypeRacer game with multiplayer support",
   "module": "src/index.tsx",
   "type": "module",
-  "private": true,
+  "author": "divquan <divquan@gmail.com>",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/divquan/ttyper.git"
+  },
+  "bugs": {
+    "url": "https://github.com/divquan/ttyper/issues"
+  },
+  "homepage": "https://github.com/divquan/ttyper#readme",
+  "keywords": [
+    "terminal",
+    "typing",
+    "game",
+    "typeracer",
+    "cli",
+    "multiplayer",
+    "tui",
+    "typing-test",
+    "speed-typing"
+  ],
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "bin": {
+    "ttyper": "dist/index.js"
+  },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
-    "dev": "bun run --watch src/index.tsx"
+    "dev": "bun run --watch src/index.tsx",
+    "build": "bun build src/index.tsx --outdir ./dist --target bun",
+    "compile": "bun build --compile src/index.tsx --outfile ttyper",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "bun run build"
   },
   "devDependencies": {
     "@types/bun": "latest"

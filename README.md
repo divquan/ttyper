@@ -1,6 +1,14 @@
 # TTyper - Terminal TypeRacer
 
+[![Version](https://img.shields.io/npm/v/ttyper)](https://www.npmjs.com/package/ttyper)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Build Status](https://github.com/divquan/ttyper/workflows/CI/badge.svg)](https://github.com/divquan/ttyper/actions)
+
 A terminal-based TypeRacer game built with React, OpenTUI, and Convex.
+
+![TTyper Screenshot](https://via.placeholder.com/800x400/1a1a1a/ffffff?text=TTyper+Screenshot+Coming+Soon)
+
+## Features
 
 ## Features
 
@@ -12,14 +20,30 @@ A terminal-based TypeRacer game built with React, OpenTUI, and Convex.
 - 🔔 **Sound Effects** - Terminal bell for errors and completion
 - 🖥️ **Responsive Design** - Works in terminals as small as 80x24
 
-## Quick Start
+## Installation
+
+### Via NPM (Recommended)
 
 ```bash
+# Install globally
+npm install -g ttyper
+
+# Or run without installing
+npx ttyper
+```
+
+### Via Source
+
+```bash
+# Clone the repository
+git clone https://github.com/divquan/ttyper.git
+cd ttyper
+
 # Install dependencies
 bun install
 
 # Run the game
-bun run src/index.tsx
+bun run dev
 ```
 
 ## Gameplay
@@ -122,12 +146,13 @@ export const themes = {
 - WPM/accuracy tracking
 - Sound effects
 
-### Phase 2 (Coming Soon)
-- Multiplayer races via Convex
-- Real-time leaderboards
-- User statistics persistence
-- Chat system
-- Spectator mode
+### Phase 2 ✅ (Implemented)
+- ✅ Multiplayer races via Convex
+- ✅ Real-time lobby system
+- ✅ Quick play matchmaking
+- User statistics persistence (Coming Soon)
+- Chat system (Coming Soon)
+- Spectator mode (Coming Soon)
 
 ### Phase 3 (Future)
 - Achievement system
@@ -143,6 +168,18 @@ export const themes = {
 - [Convex](https://convex.dev) - Backend and real-time sync
 - [Bun](https://bun.sh) - JavaScript runtime
 
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to get started.
+
+## Code of Conduct
+
+This project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a history of changes.
+
 ## License
 
-MIT
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
